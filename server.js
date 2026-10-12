@@ -19,7 +19,9 @@ const ADMIN_SESSION_KEY = crypto.createHash('sha256')
   .update(`salon-admin-session:${ADMIN_PASSWORD || crypto.randomBytes(32).toString('hex')}`)
   .digest();
 const loginAttempts = new Map();
-const uploadDir = path.join(__dirname, 'uploads');
+const uploadDir = process.env.VERCEL === '1'
+  ? path.join('/tmp', 'salon-uploads')
+  : path.join(__dirname, 'uploads');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -389,7 +391,7 @@ app.delete('/api/works/:id', requireAdmin, async (req, res) => {
     }
 
     if (item?.image_url) {
-      const filePath = path.join(__dirname, item.image_url.replace(/^\//, ''));
+      const filePath = path.join(uploadDir, path.basename(item.image_url));
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 

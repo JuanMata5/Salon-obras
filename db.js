@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
-const dbPath = path.join(__dirname, 'data.sqlite');
+const dbPath = process.env.VERCEL === '1'
+  ? path.join('/tmp', 'salon-data.sqlite')
+  : path.join(__dirname, 'data.sqlite');
 const dbDir = path.dirname(dbPath);
 
 if (!fs.existsSync(dbDir)) {
