@@ -10,7 +10,7 @@ const { init, all, run, get } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GOOGLE_SHEETS_WEBHOOK_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL || '';
-const GOOGLE_SHEETS_WEBHOOK_VERSION = 'upsert-lock-v2';
+const GOOGLE_SHEETS_WEBHOOK_VERSION = 'sheets-drive-v3';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || '';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const ADMIN_SESSION_COOKIE = 'salon_admin_session';
@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 4 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (allowed.includes(file.mimetype)) cb(null, true);
@@ -165,6 +165,28 @@ app.use('/uploads', express.static(uploadDir));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function getWorks() {
+  if (process.env.VERCEL === '1') {
+    if (!GOOGLE_SHEETS_WEBHOOK_URL) {
+      throw new Error('Falta GOOGLE_SHEETS_WEBHOOK_URL: Vercel requiere el almacenamiento persistente de Sheets/Drive.');
+    }
+
+    const listUrl = new URL(GOOGLE_SHEETS_WEBHOOK_URL);
+    listUrl.searchParams.set('action', 'list');
+    const response = await fetch(listUrl, { cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok || result?.ok !== true || result?.version !== GOOGLE_SHEETS_WEBHOOK_VERSION) {
+      throw new Error(result?.error || 'No se pudo leer el almacenamiento persistente de Google Sheets.');
+    }
+
+    return (result.works || []).map((work) => ({
+      ...work,
+      id: Number(work.id),
+      category: Array.isArray(work.category) ? work.category : [],
+      votes: Number(work.votes) || 0,
+      image_url: work.image_url || null
+    })).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
+
   const rows = await all(
     'SELECT * FROM works ORDER BY created_at DESC'
   );
@@ -196,7 +218,7 @@ async function sendToGoogleSheets(record, action = 'upsert') {
         enabled: true,
         ok: false,
         status: healthResponse.status,
-        error: 'La implementación de Google Sheets está desactualizada. Actualizá y publicá la versión upsert-lock-v2; se omitió el envío para evitar duplicados.'
+        error: `La implementación de Google Sheets está desactualizada. Publicá la versión ${GOOGLE_SHEETS_WEBHOOK_VERSION}; se omitió el envío para evitar inconsistencias.`
       };
     }
 
@@ -224,6 +246,7 @@ async function sendToGoogleSheets(record, action = 'upsert') {
       ok,
       status: response.status,
       body: responseText,
+      data: webhookResponse,
       ...(!ok ? { error: webhookResponse?.error || 'Google Sheets no confirmó el guardado.' } : {})
     };
   } catch (error) {
@@ -238,6 +261,7 @@ async function sendToGoogleSheets(record, action = 'upsert') {
 
 app.get('/api/works', async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     const works = (await getWorks())
       .filter((work) => work.status === 'approved')
       .map(({ id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at }) => ({
@@ -270,6 +294,10 @@ app.get('/api/works/export/csv', requireAdmin, async (req, res) => {
 
 app.post('/api/works', upload.single('image'), async (req, res) => {
   try {
+    if (process.env.VERCEL === '1' && !GOOGLE_SHEETS_WEBHOOK_URL) {
+      return res.status(503).json({ message: 'El almacenamiento persistente no está configurado en Vercel.' });
+    }
+
     const { title, author, theme, commercial_status, whatsapp, email, description } = req.body;
     const selectedCategories = req.body.category ?
       (Array.isArray(req.body.category) ? req.body.category : [req.body.category]) : [];
@@ -279,11 +307,14 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
     }
 
     const imageRelativePath = `/uploads/${req.file.filename}`;
+    const workId = Date.now() * 1000 + crypto.randomInt(0, 1000);
+    const createdAt = new Date().toISOString();
 
     const insertResult = await run(
-      `INSERT INTO works (title, author, theme, category, commercial_status, whatsapp, email, description, image_url, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      `INSERT INTO works (id, title, author, theme, category, commercial_status, whatsapp, email, description, image_url, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
       [
+        workId,
         title,
         author,
         theme,
@@ -292,12 +323,13 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
         whatsapp || '',
         email || '',
         description || '',
-        imageRelativePath
+        imageRelativePath,
+        createdAt
       ]
     );
 
     const savedRecord = {
-      id: insertResult?.id,
+      id: insertResult?.id || workId,
       title,
       author,
       theme,
@@ -309,10 +341,26 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
       image_url: imageRelativePath,
       status: 'pending',
       votes: 0,
-      created_at: new Date().toISOString()
+      created_at: createdAt
     };
 
-    const syncResult = await sendToGoogleSheets(savedRecord);
+    const sheetRecord = process.env.VERCEL === '1'
+      ? {
+          ...savedRecord,
+          image_base64: fs.readFileSync(req.file.path).toString('base64'),
+          image_mime_type: req.file.mimetype,
+          image_file_name: req.file.originalname
+        }
+      : savedRecord;
+    const syncResult = await sendToGoogleSheets(sheetRecord);
+    if (process.env.VERCEL === '1' && !syncResult.ok) {
+      return res.status(502).json({ message: syncResult.error || 'No se pudo guardar la obra de forma persistente.' });
+    }
+
+    if (process.env.VERCEL === '1' && req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
     if (syncResult.enabled && !syncResult.ok) {
       console.warn('Google Sheets sync warning:', syncResult);
     }
@@ -328,18 +376,20 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
 app.post('/api/works/:id/vote', async (req, res) => {
   try {
     const { id } = req.params;
-    const work = await get('SELECT id, status, votes FROM works WHERE id = ?', [id]);
+    const work = (await getWorks()).find((item) => String(item.id) === String(id));
 
     if (!work || work.status !== 'approved') {
       return res.status(404).json({ message: 'Obra no disponible para votar.' });
     }
 
-    await run('UPDATE works SET votes = votes + 1 WHERE id = ? AND status = ?', [id, 'approved']);
-    const updated = await get('SELECT * FROM works WHERE id = ?', [id]);
-    const syncResult = await sendToGoogleSheets({
-      ...updated,
-      category: updated.category ? JSON.parse(updated.category) : []
-    });
+    const updated = { ...work, votes: (Number(work.votes) || 0) + 1 };
+    const syncResult = await sendToGoogleSheets(updated);
+    if (process.env.VERCEL === '1' && !syncResult.ok) {
+      return res.status(502).json({ message: syncResult.error || 'No se pudo guardar el voto de forma persistente.' });
+    }
+    if (process.env.VERCEL !== '1') {
+      await run('UPDATE works SET votes = ? WHERE id = ?', [updated.votes, id]);
+    }
     if (syncResult.enabled && !syncResult.ok) {
       console.warn('Google Sheets vote sync warning:', syncResult);
     }
@@ -359,17 +409,19 @@ app.patch('/api/works/:id/status', requireAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Estado no válido.' });
     }
 
-    const existing = await get('SELECT id FROM works WHERE id = ?', [id]);
+    const existing = (await getWorks()).find((item) => String(item.id) === String(id));
     if (!existing) {
       return res.status(404).json({ message: 'Obra no encontrada.' });
     }
 
-    await run('UPDATE works SET status = ? WHERE id = ?', [status, id]);
-    const updated = await get('SELECT * FROM works WHERE id = ?', [id]);
-    const syncResult = await sendToGoogleSheets({
-      ...updated,
-      category: updated.category ? JSON.parse(updated.category) : []
-    });
+    const updated = { ...existing, status };
+    const syncResult = await sendToGoogleSheets(updated);
+    if (process.env.VERCEL === '1' && !syncResult.ok) {
+      return res.status(502).json({ message: syncResult.error || 'No se pudo guardar el estado de forma persistente.' });
+    }
+    if (process.env.VERCEL !== '1') {
+      await run('UPDATE works SET status = ? WHERE id = ?', [status, id]);
+    }
     if (syncResult.enabled && !syncResult.ok) {
       console.warn('Google Sheets status sync warning:', syncResult);
     }
@@ -385,18 +437,23 @@ app.patch('/api/works/:id/status', requireAdmin, async (req, res) => {
 app.delete('/api/works/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const item = await get('SELECT * FROM works WHERE id = ?', [id]);
+    const item = (await getWorks()).find((work) => String(work.id) === String(id));
     if (!item) {
       return res.status(404).json({ message: 'Obra no encontrada.' });
     }
 
-    if (item?.image_url) {
+    if (process.env.VERCEL !== '1' && item?.image_url) {
       const filePath = path.join(uploadDir, path.basename(item.image_url));
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
-    await run('DELETE FROM works WHERE id = ?', [id]);
     const syncResult = await sendToGoogleSheets({ id: item.id }, 'delete');
+    if (process.env.VERCEL === '1' && !syncResult.ok) {
+      return res.status(502).json({ message: syncResult.error || 'No se pudo borrar la obra del almacenamiento persistente.' });
+    }
+    if (process.env.VERCEL !== '1') {
+      await run('DELETE FROM works WHERE id = ?', [id]);
+    }
     if (syncResult.enabled && !syncResult.ok) {
       console.warn('Google Sheets delete warning:', syncResult);
     }

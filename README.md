@@ -12,12 +12,12 @@ Sitio para presentar, votar y administrar obras del Salón Plein Air.
 
 La aplicación local usa Express, SQLite y archivos guardados en `uploads/`. El panel administrativo está en `/admin`.
 
-## Google Sheets
+## Google Sheets y Drive
 
-Configurar `GOOGLE_SHEETS_WEBHOOK_URL` con la URL de la aplicación web de Apps Script. El código de referencia está en `google-sheets-apps-script.js`; después de cambiarlo hay que implementar una nueva versión en Apps Script.
+Configurar `GOOGLE_SHEETS_WEBHOOK_URL` con la URL de la aplicación web de Apps Script. En producción, Sheets guarda los datos y Drive aloja las imágenes subidas.
 
-## Antes de producción en Vercel
+Antes de cada despliegue que cambie `google-sheets-apps-script.js`, copiar el código al proyecto Apps Script, autorizar los permisos de Sheets y Drive, y publicar una nueva versión de la aplicación web. El servidor valida que responda `sheets-drive-v3` y rechaza escrituras si el Web App no está actualizado.
 
-El proyecto actual guarda datos en SQLite local y las imágenes en el disco local. El almacenamiento de una función serverless de Vercel no es persistente; por eso, **no se deben recibir obras reales en un despliegue Vercel de esta versión**, ya que los datos o las imágenes podrían perderse.
+El desarrollo local sigue usando SQLite y `uploads/`. En Vercel, la lectura se hace desde Sheets y las imágenes nuevas se guardan en Drive para no depender del `/tmp` efímero.
 
-Antes de usarlo en producción, hay que migrar SQLite a una base administrada (por ejemplo, Postgres/Neon) y las imágenes a almacenamiento persistente (por ejemplo, Vercel Blob o S3), además de adaptar y validar las rutas Express como funciones serverless. Las variables privadas de `.env` se cargan en **Vercel → Project Settings → Environment Variables**; nunca se sube `.env` al repositorio.
+Las variables privadas de `.env` se cargan en **Vercel → Project Settings → Environment Variables**; nunca se sube `.env` al repositorio.
