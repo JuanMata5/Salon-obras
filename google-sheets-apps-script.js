@@ -12,6 +12,14 @@ function jsonOutput(value) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// Ejecutar manualmente una vez desde el editor para conceder permisos de Drive.
+function authorizeStorage() {
+  SpreadsheetApp.getActiveSpreadsheet().getName();
+  const probe = DriveApp.createFile('salon-drive-authorization-check.txt', 'Permiso de Drive autorizado.');
+  probe.setTrashed(true);
+  return 'Autorización de Sheets y Drive completada.';
+}
+
 function getWorksFromSheet() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = spreadsheet.getSheetByName(SHEET_NAME) || spreadsheet.insertSheet(SHEET_NAME);

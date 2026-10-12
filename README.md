@@ -18,6 +18,8 @@ Configurar `GOOGLE_SHEETS_WEBHOOK_URL` con la URL de la aplicación web de Apps 
 
 Antes de cada despliegue que cambie `google-sheets-apps-script.js`, copiar el código al proyecto Apps Script, autorizar los permisos de Sheets y Drive, y publicar una nueva versión de la aplicación web. El servidor valida que responda `sheets-drive-v3` y rechaza escrituras si el Web App no está actualizado.
 
+Si Apps Script indica que no hay permiso para `DriveApp.createFile`, activar la visualización del manifiesto `appsscript.json` en la configuración del editor, copiar allí el manifiesto del repositorio y ejecutar manualmente `authorizeStorage()` desde el editor. Aceptar el consentimiento de Google y luego actualizar la implementación como nueva versión.
+
 El desarrollo local sigue usando SQLite y `uploads/`. En Vercel, la lectura se hace desde Sheets y las imágenes nuevas se guardan en Drive para no depender del `/tmp` efímero.
 
 Las variables privadas de `.env` se cargan en **Vercel → Project Settings → Environment Variables**; nunca se sube `.env` al repositorio.
