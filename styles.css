@@ -1172,3 +1172,47 @@ input[type="file"]::file-selector-button:hover {
     height: clamp(280px, 85vw, 380px);
   }
 }
+
+/* Imágenes de obras más compactas, también cuando la galería tiene una sola tarjeta. */
+.gallery-feed {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  justify-items: start;
+  gap: 20px;
+}
+
+.gallery-card {
+  width: 100%;
+  max-width: 320px;
+}
+
+.gallery-card img {
+  height: clamp(170px, 17vw, 210px);
+}
+
+.hero-figure img {
+  height: clamp(340px, 29vw, 420px);
+}
+
+@media (max-width: 900px) {
+  .hero-figure img {
+    height: clamp(320px, 52vw, 400px);
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-figure img {
+    height: clamp(270px, 78vw, 340px);
+  }
+
+  .gallery-feed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery-card {
+    max-width: 100%;
+  }
+
+  .gallery-card img {
+    height: clamp(190px, 65vw, 240px);
+  }
+}
