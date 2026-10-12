@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog de Fotos con Votación</title>
+    <meta
+      name="description"
+      content="Convocatoria abierta de obras pictóricas con votación visual para el salón plein air."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="support-bar">
+      <div class="container support-inner">
+        <strong>DONA! Apoya este proyecto</strong>
+        <a href="https://www.mercadopago.com.ar/" target="_blank" rel="noreferrer">Donar</a>
+      </div>
+    </div>
+
+    <div class="page-shell">
+      <header class="site-header" id="inicio">
+        <div class="container nav-wrap">
+          <a href="#inicio" class="brand" aria-label="Manchas Tribú Salón Plein Air">
+            <img src="public/4ef15440306a6bc2df20f9369c1138db.png" alt="Manchas Tribú Salón Plein Air" />
+            <span>Manchas Tribú Salón Plein Air</span>
+          </a>
+          <button class="primary-button" type="button">Subir tu pintura</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="container hero-grid">
+            <div class="hero-copy">
+              <p class="eyebrow">Convocatoria abierta · edición 2026</p>
+              <h1>Pinturas que salen a respirar.</h1>
+              <p class="lead">
+                Un salón público para compartir miradas dibujadas del mundo: paisaje, calle,
+                memoria, observación y color.
+              </p>
+              <div class="hero-actions">
+                <button class="primary-button" type="button">Subir tu pintura</button>
+                <a href="#galeria" class="link-button">Explorar galería</a>
+                <a href="#coleccion-comercial" class="link-button">Adquisición de obra</a>
+                <a href="#votacion" class="link-button">Votación de Obras para el Salón</a>
+              </div>
+            </div>
+
+            <figure class="hero-figure">
+              <img src="public/1ee88d9eb87c6d59569a5d531bf520d7.png" alt="Emblema de Manchas Tribú Salón Plein Air" />
+              <figcaption>El dibujo comienza donde se posa la mirada.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="notice container">
+          <div class="notice-image-wrap">
+            <img src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=900&q=80" alt="Detalle de una obra pictórica" />
+          </div>
+          <p>
+            Las imágenes subidas pueden quedar pendientes de moderación antes de publicarse. La
+            organización podrá validar y moderar las obras antes de publicar los resultados.
+          </p>
+        </section>
+
+        <section class="participation section-space" aria-labelledby="participacion-heading">
+          <div class="container split-layout">
+            <div class="copy-block">
+              <p class="label">Participación</p>
+              <h2 id="participacion-heading">Traé tu trazo al salón</h2>
+              <p>
+                Compartí una pintura propia, realizada au plein air o estudio, ponéle nombre y dejá
+                una breve pista de su historia. Si fue a todo plein air o continuo en salón,
+                también podés indicar si está disponible para la venta. En ese caso se presenta en
+                las dos opciones; en caso de venta antes del salón, el nuevo dueño deberá esperar a
+                que finalice el salón.
+              </p>
+              <div class="steps-card">
+                <h3>Cómo participar</h3>
+                <ol>
+                  <li>Elegí una imagen de tu ilustración.</li>
+                  <li>Indicá tema, autoría y contexto de la obra.</li>
+                  <li>Definí si está a la venta y enviála a moderación.</li>
+                </ol>
+              </div>
+            </div>
+
+            <form class="submission-form" aria-label="Formulario para subir obra pictórica">
+              <h2>Enviar tu obra pictórica</h2>
+              <p class="required">* Campos obligatorios</p>
+
+              <div class="field-group upload-box">
+                <label>Imagen de la obra</label>
+                <button type="button" class="upload-button">Imagen de la obra</button>
+                <small>Formatos JPG, PNG, WEBP o GIF · máximo 8 MB.</small>
+              </div>
+
+              <div class="field-group">
+                <label for="titulo">Título de la obra</label>
+                <input id="titulo" type="text" placeholder="Título de la obra" />
+              </div>
+
+              <div class="field-group">
+                <label for="autor">Autor o seudónimo</label>
+                <input id="autor" type="text" placeholder="Autor o seudónimo" />
+              </div>
+
+              <div class="field-group">
+                <label for="tema">Tema de la obra</label>
+                <select id="tema">
+                  <option>Pintura</option>
+                  <option>Pintura au plein air</option>
+                  <option>Sketching</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="categoria">Categoría técnica (podés elegir varias)</label>
+                <select id="categoria" multiple size="7">
+                  <option>Acuarela</option>
+                  <option>Gouache</option>
+                  <option>Pastel</option>
+                  <option>Dibujo</option>
+                  <option>Óleo de estudio</option>
+                  <option>Paiseaje</option>
+                  <option>Figura humana en el paisaje</option>
+                  <option>Sketching urbano</option>
+                  <option>Pintura urbana</option>
+                  <option>Seleccionada en la jornada plein air</option>
+                  <option>Pleinair</option>
+                  <option>Continuación estudio</option>
+                  <option>De estudio</option>
+                </select>
+                <small>Podés elegir varias opciones (Ctrl o ⌘ + clic).</small>
+              </div>
+
+              <div class="field-group">
+                <label for="estado">Estado comercial</label>
+                <select id="estado">
+                  <option>No está a la venta</option>
+                  <option>A la venta</option>
+                  <option>Participa en el salón</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="whatsapp">WhatsApp</label>
+                <input id="whatsapp" type="text" placeholder="WhatsApp" />
+              </div>
+
+              <div class="field-group">
+                <label for="email">Correo electrónico</label>
+                <input id="email" type="email" placeholder="Correo electrónico" />
+              </div>
+
+              <div class="field-group">
+                <label for="descripcion">Descripción breve</label>
+                <textarea id="descripcion" rows="4" placeholder="Descripción breve"></textarea>
+              </div>
+
+              <label class="checkbox-row">
+                <input type="checkbox" />
+                <span>
+                  Confirmo que la obra es propia o que tengo permiso para compartirla, y acepto
+                  las normas del salón.
+                </span>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="primary-button large-button">Enviar tu obra pictórica</button>
+                <small>La obra y su información comercial se revisarán antes de publicarse.</small>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="gallery-section section-space" id="galeria" aria-labelledby="galeria-heading">
+          <div class="container">
+            <p class="label">Galería pública</p>
+            <h2 id="galeria-heading">Obras realizadas au plein air</h2>
+
+            <div class="toolbar">
+              <div class="search-box">
+                <span>Buscar por más votadas, más recientes, título o autor</span>
+                <input type="search" placeholder="Buscar por más votadas, más recientes, título o autor" />
+              </div>
+              <div class="toolbar-selects">
+                <div class="field-group inline-field">
+                  <label>Filtrar por tema</label>
+                  <select>
+                    <option>Todos</option>
+                  </select>
+                </div>
+                <div class="field-group inline-field">
+                  <label>Ordenar galería</label>
+                  <select>
+                    <option>Más recientes</option>
+                    <option>Más votadas</option>
+                    <option>Por título</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="commercial section-space" id="coleccion-comercial" aria-labelledby="coleccion-heading">
+          <div class="container collection-box">
+            <div class="collection-head">
+              <p class="label">Colección comercial</p>
+              <h2 id="coleccion-heading">Adquisición de obra</h2>
+              <p>
+                Una selección de obras disponibles directamente desde el salón. Las obras no
+                comerciales siguen visibles en la galería general.
+              </p>
+            </div>
+
+            <div class="toolbar compact-toolbar">
+              <div class="search-box">
+                <span>Buscar obra a la venta</span>
+                <input type="search" placeholder="Buscar obra a la venta" />
+              </div>
+              <div class="toolbar-selects">
+                <div class="field-group inline-field">
+                  <label>Tema</label>
+                  <select><option>Todos</option></select>
+                </div>
+                <div class="field-group inline-field">
+                  <label>Autor o seudónimo</label>
+                  <select><option>Todos</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="voting section-space" id="votacion" aria-labelledby="voting-heading">
+          <div class="container voting-shell">
+            <div class="voting-header">
+              <p class="label">Salón 2026</p>
+              <h2 id="voting-heading">Votación de Obras para el Salón</h2>
+              <p>
+                Explorá las obras participantes elegibles y acompañá con tu voto aquellas que te
+                gustaría ver destacadas en el salón.
+              </p>
+            </div>
+
+            <div class="toolbar vote-toolbar">
+              <div class="field-group inline-field">
+                <label>Período de votación</label>
+                <select>
+                  <option>Votación abierta</option>
+                  <option>Votación cerrada</option>
+                  <option>Próximamente</option>
+                </select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Filtrar por tema</label>
+                <select><option>Todos</option></select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Filtrar por autor</label>
+                <select><option>Todos</option></select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Ordenar obras</label>
+                <select>
+                  <option>Más votadas</option>
+                  <option>Más recientes</option>
+                  <option>Por tema</option>
+                </select>
+              </div>
+            </div>
+
+            <p class="muted-note">
+              La organización podrá validar y moderar las obras antes de publicar los resultados.
+            </p>
+          </div>
+        </section>
+
+        <section class="internal section-space">
+          <div class="container internal-box">
+            <h2>Administración interna · autorización de obras</h2>
+            <p>
+              Vista interna sin autenticación: mantener separada y compartir solo con personas
+              autorizadas.
+            </p>
+          </div>
+        </section>
+
+        <section class="rules section-space" aria-labelledby="rules-heading">
+          <div class="container rules-box">
+            <p class="label">Cuidemos el salón</p>
+            <h2 id="rules-heading">Normas breves, comunidad atenta</h2>
+            <p>
+              El salón es un espacio abierto para celebrar el trabajo ilustrado. Publicá obras
+              propias o autorizadas, respetá a la comunidad y reportá contenido que requiera
+              revisión.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="container footer-inner">
+          <p>Salon Plein air 2026 · Un salón editorial para mirar con otros ojos.</p>
+          <a href="#inicio">Volver arriba ↑</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

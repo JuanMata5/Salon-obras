@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Acceso administrador · Manchas Tribú</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-login-body">
+    <main class="admin-login-card">
+      <a class="admin-login-brand" href="/" aria-label="Volver al sitio">
+        <span class="admin-login-mark" aria-hidden="true">M</span>
+        <span>Manchas Tribú <small>Salón Plein Air</small></span>
+      </a>
+      <p class="admin-label">Acceso privado</p>
+      <h1>Panel de administración</h1>
+      <p class="admin-login-intro">Iniciá sesión para revisar y gestionar las obras del salón.</p>
+      <form id="admin-login-form" class="admin-login-form">
+        <label class="field-group">
+          <span>Usuario</span>
+          <input name="username" type="text" autocomplete="username" required autofocus />
+        </label>
+        <label class="field-group">
+          <span>Contraseña</span>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="admin-login-message" class="admin-login-message" role="alert" aria-live="polite"></p>
+        <button class="primary-button admin-login-submit" type="submit">Entrar al panel</button>
+      </form>
+      <a class="admin-login-back" href="/">Volver al sitio público</a>
+    </main>
+    <script src="/admin-login.js"></script>
+  </body>
+</html>

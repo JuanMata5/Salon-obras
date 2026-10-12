@@ -1,0 +1,16 @@
+{
+  "name": "salon-plein-air",
+  "version": "1.0.0",
+  "description": "Sitio funcional para envío y administración de obras pictóricas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.7"
+  }
+}
