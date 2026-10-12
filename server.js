@@ -240,8 +240,8 @@ app.get('/api/works', async (req, res) => {
   try {
     const works = (await getWorks())
       .filter((work) => work.status === 'approved')
-      .map(({ id, title, author, theme, category, commercial_status, description, image_url, votes, created_at }) => ({
-        id, title, author, theme, category, commercial_status, description, image_url, votes, created_at
+      .map(({ id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at }) => ({
+        id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at
       }));
     res.json({ works });
   } catch (error) {
