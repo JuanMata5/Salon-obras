@@ -10,7 +10,7 @@ const { init, all, run, get } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GOOGLE_SHEETS_WEBHOOK_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL || '';
-const GOOGLE_SHEETS_WEBHOOK_VERSION = 'sheets-drive-v3';
+const GOOGLE_SHEETS_WEBHOOK_VERSION = 'sheets-drive-v4';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || '';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const ADMIN_SESSION_COOKIE = 'salon_admin_session';
@@ -293,8 +293,8 @@ app.get('/api/works', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     const works = (await getWorks())
       .filter((work) => work.status === 'approved')
-      .map(({ id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at }) => ({
-        id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at
+      .map(({ id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at, price_amount, price_currency }) => ({
+        id, title, author, theme, category, commercial_status, description, image_url, status, votes, created_at, price_amount, price_currency
       }));
     res.json({ works });
   } catch (error) {
@@ -306,7 +306,7 @@ app.get('/api/works', async (req, res) => {
 app.get('/api/works/export/csv', requireAdmin, async (req, res) => {
   try {
     const works = await getWorks();
-    const fields = ['id', 'title', 'author', 'theme', 'category', 'commercial_status', 'whatsapp', 'email', 'description', 'image_url', 'status', 'votes', 'created_at'];
+    const fields = ['id', 'title', 'author', 'theme', 'category', 'commercial_status', 'price_amount', 'price_currency', 'whatsapp', 'email', 'description', 'image_url', 'status', 'votes', 'created_at'];
     const normalize = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const rows = [fields.join(',')].concat(
       works.map((work) => fields.map((field) => normalize(work[field])).join(','))
@@ -328,20 +328,33 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
     }
 
     const { title, author, theme, commercial_status, whatsapp, email, description } = req.body;
+    const priceAmount = req.body.price_amount === undefined || req.body.price_amount === ''
+      ? null
+      : Number(req.body.price_amount);
+    const priceCurrency = req.body.price_currency || '';
     const selectedCategories = req.body.category ?
       (Array.isArray(req.body.category) ? req.body.category : [req.body.category]) : [];
 
     if (!title || !author || !theme || !commercial_status || !req.file) {
       return res.status(400).json({ message: 'Faltan campos obligatorios.' });
     }
+    if (!['No está a la venta', 'A la venta'].includes(commercial_status)) {
+      return res.status(400).json({ message: 'Elegí si la obra está a la venta o no.' });
+    }
+    if (commercial_status === 'A la venta'
+      && (!Number.isFinite(priceAmount) || priceAmount <= 0 || !['ARS', 'USD', 'EUR'].includes(priceCurrency))) {
+      return res.status(400).json({ message: 'Ingresá un precio mayor a cero y elegí ARS, USD o EUR.' });
+    }
+    const savedPriceAmount = commercial_status === 'A la venta' ? priceAmount : null;
+    const savedPriceCurrency = commercial_status === 'A la venta' ? priceCurrency : '';
 
     const imageRelativePath = `/uploads/${req.file.filename}`;
     const workId = Date.now() * 1000 + crypto.randomInt(0, 1000);
     const createdAt = new Date().toISOString();
 
     const insertResult = await run(
-      `INSERT INTO works (id, title, author, theme, category, commercial_status, whatsapp, email, description, image_url, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      `INSERT INTO works (id, title, author, theme, category, commercial_status, whatsapp, email, description, image_url, status, price_amount, price_currency, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
       [
         workId,
         title,
@@ -353,6 +366,8 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
         email || '',
         description || '',
         imageRelativePath,
+        savedPriceAmount,
+        savedPriceCurrency,
         createdAt
       ]
     );
@@ -364,6 +379,8 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
       theme,
       category: selectedCategories,
       commercial_status,
+      price_amount: savedPriceAmount,
+      price_currency: savedPriceCurrency,
       whatsapp: whatsapp || '',
       email: email || '',
       description: description || '',

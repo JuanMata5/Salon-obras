@@ -46,11 +46,15 @@ function setOptions(selectId, values) {
 function workCard(work, voting = false) {
   const voted = localStorage.getItem(`salon-vote-${work.id}`) === '1';
   const image = work.image_url || fallbackImage;
+  const price = work.commercial_status === 'A la venta' && Number(work.price_amount) > 0 && ['ARS', 'USD', 'EUR'].includes(work.price_currency)
+    ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: work.price_currency, maximumFractionDigits: 2 }).format(Number(work.price_amount))
+    : '';
   return `<article class="gallery-card">
     <img src="${escapeHTML(image)}" alt="Obra: ${escapeHTML(work.title)}" loading="lazy" />
     <div class="gallery-card-body">
       <h3>${escapeHTML(work.title)}</h3>
       <p>${escapeHTML(work.author)} · ${escapeHTML(work.theme)}</p>
+      ${price ? `<p class="work-price">${escapeHTML(price)}</p>` : ''}
       ${work.description ? `<p>${escapeHTML(work.description)}</p>` : ''}
       ${voting ? `<p class="vote-count">${Number(work.votes) || 0} votos</p>
         <button class="action-btn vote-btn" data-id="${Number(work.id)}" ${voted ? 'disabled' : ''}>${voted ? 'Voto registrado' : 'Votar por esta obra'}</button>` : ''}
@@ -145,6 +149,21 @@ async function voteForWork(button) {
 ['gallery-theme', 'gallery-sort', 'commercial-theme', 'commercial-author', 'voting-period', 'voting-theme', 'voting-author', 'voting-sort']
   .forEach((id) => document.getElementById(id)?.addEventListener('change', renderAll));
 
+const commercialStatus = document.getElementById('estado');
+const priceFields = document.getElementById('price-fields');
+const priceAmount = document.getElementById('price-amount');
+const priceCurrency = document.getElementById('price-currency');
+function updatePriceFields() {
+  const isForSale = commercialStatus?.value === 'A la venta';
+  if (priceFields) priceFields.hidden = !isForSale;
+  if (priceAmount) {
+    priceAmount.required = isForSale;
+    if (!isForSale) priceAmount.value = '';
+  }
+}
+commercialStatus?.addEventListener('change', updatePriceFields);
+updatePriceFields();
+
 if (form) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -162,6 +181,10 @@ if (form) {
     formData.append('author', document.getElementById('autor').value.trim());
     formData.append('theme', document.getElementById('tema').value);
     formData.append('commercial_status', document.getElementById('estado').value);
+    if (commercialStatus.value === 'A la venta') {
+      formData.append('price_amount', priceAmount.value);
+      formData.append('price_currency', priceCurrency.value);
+    }
     formData.append('whatsapp', document.getElementById('whatsapp').value.trim());
     formData.append('email', document.getElementById('email').value.trim());
     formData.append('description', document.getElementById('descripcion').value.trim());
@@ -177,6 +200,7 @@ if (form) {
         ? 'La obra se guardó en el sitio, pero no se pudo confirmar en Google Sheets. Avisá a la organización antes de volver a enviarla.'
         : 'Obra enviada correctamente. Será revisada por la organización.';
       form.reset();
+      updatePriceFields();
       await loadWorks();
     } catch (error) {
       statusText.textContent = error.message || 'Hubo un error al enviar la obra.';

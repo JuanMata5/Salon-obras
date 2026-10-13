@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #e8dced;
   --panel: #f4edf7;
   --card: #fffdfd;
@@ -346,6 +347,12 @@ h3 {
   margin-bottom: 16px;
 }
 
+.price-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 0.85fr);
+  gap: 10px;
+}
+
 .field-group label {
   font-weight: 600;
   color: var(--brown);
@@ -494,6 +501,13 @@ input[type="file"] {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+.gallery-card-body .work-price {
+  margin-top: 10px;
+  color: var(--accent-dark);
+  font-size: 1.08rem;
+  font-weight: 700;
 }
 
 .gallery-card-body .vote-count {
@@ -795,6 +809,19 @@ input[type="file"] {
 }
 
 @media (max-width: 560px) {
+  body {
+    background: var(--bg);
+    color: var(--brown);
+  }
+
+  .page-shell {
+    background: var(--panel);
+  }
+
+  .price-input-row {
+    grid-template-columns: 1fr;
+  }
+
   .support-inner {
     min-height: 74px;
     padding: 12px 0;

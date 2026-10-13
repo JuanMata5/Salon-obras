@@ -55,6 +55,8 @@ async function init() {
       image_url TEXT,
       status TEXT DEFAULT 'pending',
       votes INTEGER NOT NULL DEFAULT 0,
+      price_amount REAL,
+      price_currency TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -62,6 +64,12 @@ async function init() {
   const columns = await all('PRAGMA table_info(works)');
   if (!columns.some((column) => column.name === 'votes')) {
     await run('ALTER TABLE works ADD COLUMN votes INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!columns.some((column) => column.name === 'price_amount')) {
+    await run('ALTER TABLE works ADD COLUMN price_amount REAL');
+  }
+  if (!columns.some((column) => column.name === 'price_currency')) {
+    await run('ALTER TABLE works ADD COLUMN price_currency TEXT');
   }
 }
 

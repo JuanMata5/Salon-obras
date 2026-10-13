@@ -6,6 +6,15 @@ function escapeHTML(value = '') {
   })[character]);
 }
 
+function formatPrice(work) {
+  if (Number(work.price_amount) <= 0 || !['ARS', 'USD', 'EUR'].includes(work.price_currency)) return '';
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: work.price_currency,
+    maximumFractionDigits: 2
+  }).format(Number(work.price_amount));
+}
+
 async function fetchWorks() {
   const res = await fetch('/api/admin/works');
   if (res.status === 401) {
@@ -49,6 +58,7 @@ function renderWorks(works) {
         </div>
         <p><strong>Tema:</strong> ${escapeHTML(work.theme)}</p>
         <p><strong>Estado comercial:</strong> ${escapeHTML(work.commercial_status)}</p>
+        ${work.commercial_status === 'A la venta' && formatPrice(work) ? `<p><strong>Precio:</strong> ${escapeHTML(formatPrice(work))}</p>` : ''}
         <p><strong>Email:</strong> ${escapeHTML(work.email || '—')}</p>
         <p><strong>WhatsApp:</strong> ${escapeHTML(work.whatsapp || '—')}</p>
         <p><strong>Descripción:</strong> ${escapeHTML(work.description || 'Sin descripción')}</p>

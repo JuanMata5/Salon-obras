@@ -164,8 +164,19 @@
                 <select id="estado" name="commercial_status" required>
                   <option value="No está a la venta">No está a la venta</option>
                   <option value="A la venta">A la venta</option>
-                  <option value="Participa en el salón">Participa en el salón</option>
                 </select>
+              </div>
+
+              <div class="field-group" id="price-fields" hidden>
+                <label for="price-amount">Precio de la obra</label>
+                <div class="price-input-row">
+                  <input id="price-amount" name="price_amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Ej.: 150000" />
+                  <select id="price-currency" name="price_currency" aria-label="Moneda del precio">
+                    <option value="ARS">Pesos argentinos (ARS)</option>
+                    <option value="USD">Dólares (USD)</option>
+                    <option value="EUR">Euros (EUR)</option>
+                  </select>
+                </div>
               </div>
 
               <div class="field-group">

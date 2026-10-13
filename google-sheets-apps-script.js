@@ -1,10 +1,11 @@
 // Google Sheets + Drive como almacenamiento persistente para el salón.
 // Implementar como aplicación web: ejecutar como propietario y permitir acceso externo.
-const STORAGE_VERSION = 'sheets-drive-v3';
+const STORAGE_VERSION = 'sheets-drive-v4';
 const SHEET_NAME = 'Obras';
 const HEADERS = [
   'id', 'title', 'author', 'theme', 'category', 'commercial_status',
-  'whatsapp', 'email', 'description', 'image_url', 'status', 'votes', 'created_at'
+  'whatsapp', 'email', 'description', 'image_url', 'status', 'votes', 'created_at',
+  'price_amount', 'price_currency'
 ];
 
 function jsonOutput(value) {
@@ -133,7 +134,9 @@ function doPost(e) {
       image_url: imageUrl,
       status: record.status || 'pending',
       votes: Number(record.votes) || 0,
-      created_at: record.created_at || new Date().toISOString()
+      created_at: record.created_at || new Date().toISOString(),
+      price_amount: Number(record.price_amount) || '',
+      price_currency: record.price_currency || ''
     };
     Object.keys(rowRecord).forEach((key) => { values[indexes[key]] = rowRecord[key]; });
 
