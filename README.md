@@ -16,7 +16,7 @@ La aplicación local usa Express, SQLite y archivos guardados en `uploads/`. El 
 
 Configurar `GOOGLE_SHEETS_WEBHOOK_URL` con la URL de la aplicación web de Apps Script. En producción, Sheets guarda los datos y Drive aloja las imágenes subidas.
 
-Antes de cada despliegue que cambie `google-sheets-apps-script.js`, copiar el código al proyecto Apps Script, autorizar los permisos de Sheets y Drive, y publicar una nueva versión de la aplicación web. El servidor valida que responda `sheets-drive-v4` y rechaza escrituras si el Web App no está actualizado.
+Antes de cada despliegue que cambie `google-sheets-apps-script.js`, copiar el código al proyecto Apps Script, autorizar los permisos de Sheets y Drive, y publicar una nueva versión de la aplicación web. El servidor valida que responda `sheets-drive-v3` y rechaza escrituras si el Web App no está actualizado.
 
 Si Apps Script indica que no hay permiso para `DriveApp.createFile`, activar la visualización del manifiesto `appsscript.json` en la configuración del editor, copiar allí el manifiesto del repositorio y ejecutar manualmente `authorizeStorage()` desde el editor. Aceptar el consentimiento de Google y luego actualizar la implementación como nueva versión.
 
@@ -26,4 +26,4 @@ Las variables privadas de `.env` se cargan en **Vercel → Project Settings → 
 
 Para que los enlaces compartidos y el sitemap usen el dominio definitivo, configurar `PUBLIC_SITE_URL` en Vercel con la URL pública completa, por ejemplo `https://tudominio.com` (sin `/` al final). Si no se configura, el sitio usa el dominio de producción de Vercel o el host de la solicitud.
 
-Al publicar sheets-drive-v4 en Apps Script, las columnas price_amount y price_currency se agregan a la hoja automaticamente. Las obras aprobadas que esten a la venta aparecen tanto en la coleccion comercial como en la votacion.
+Al publicar sheets-drive-v3 en Apps Script, las columnas price_amount y price_currency se agregan a la hoja automaticamente. Las obras aprobadas que esten a la venta aparecen tanto en la coleccion comercial como en la votacion.

@@ -1,6 +1,6 @@
 // Google Sheets + Drive como almacenamiento persistente para el salón.
 // Implementar como aplicación web: ejecutar como propietario y permitir acceso externo.
-const STORAGE_VERSION = 'sheets-drive-v4';
+const STORAGE_VERSION = 'sheets-drive-v3';
 const SHEET_NAME = 'Obras';
 const HEADERS = [
   'id', 'title', 'author', 'theme', 'category', 'commercial_status',
