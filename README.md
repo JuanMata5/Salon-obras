@@ -23,3 +23,5 @@ Si Apps Script indica que no hay permiso para `DriveApp.createFile`, activar la 
 El desarrollo local sigue usando SQLite y `uploads/`. En Vercel, la lectura se hace desde Sheets y las imágenes nuevas se guardan en Drive para no depender del `/tmp` efímero.
 
 Las variables privadas de `.env` se cargan en **Vercel → Project Settings → Environment Variables**; nunca se sube `.env` al repositorio.
+
+Para que los enlaces compartidos y el sitemap usen el dominio definitivo, configurar `PUBLIC_SITE_URL` en Vercel con la URL pública completa, por ejemplo `https://tudominio.com` (sin `/` al final). Si no se configura, el sitio usa el dominio de producción de Vercel o el host de la solicitud.

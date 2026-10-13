@@ -161,6 +161,35 @@ app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+function getPublicSiteUrl(req) {
+  const configuredUrl = process.env.PUBLIC_SITE_URL
+    || process.env.VERCEL_PROJECT_PRODUCTION_URL
+    || process.env.VERCEL_URL
+    || req.get('host');
+  const withProtocol = /^https?:\/\//i.test(configuredUrl)
+    ? configuredUrl
+    : `${process.env.VERCEL === '1' ? 'https' : req.protocol}://${configuredUrl}`;
+  const parsedUrl = new URL(withProtocol);
+  if (process.env.VERCEL === '1') parsedUrl.protocol = 'https:';
+  return parsedUrl.origin;
+}
+
+app.get('/robots.txt', (req, res) => {
+  const siteUrl = getPublicSiteUrl(req);
+  res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: ${siteUrl}/sitemap.xml\n`);
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  const siteUrl = getPublicSiteUrl(req);
+  res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url></urlset>`);
+});
+
+app.get('/', (req, res) => {
+  const siteUrl = getPublicSiteUrl(req);
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  res.type('html').send(html.replaceAll('__SITE_URL__', siteUrl));
+});
+
 app.use('/uploads', express.static(uploadDir));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -473,7 +502,9 @@ app.delete('/api/works/:id', requireAdmin, async (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const siteUrl = getPublicSiteUrl(req);
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  res.type('html').send(html.replaceAll('__SITE_URL__', siteUrl));
 });
 
 async function start() {

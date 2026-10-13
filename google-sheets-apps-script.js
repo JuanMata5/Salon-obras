@@ -114,7 +114,10 @@ function doPost(e) {
       const fileName = String(record.image_file_name || `obra-${record.id}.jpg`).replace(/[\\/:*?"<>|]/g, '_');
       const file = DriveApp.createFile(Utilities.newBlob(bytes, mimeType, fileName));
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      imageUrl = `https://drive.google.com/uc?export=view&id=${file.getId()}`;
+      // The `uc?export=view` endpoint can return a redirect/HTML confirmation
+      // page that browsers cannot render as an <img>. Use Drive's thumbnail
+      // endpoint for a direct image response instead.
+      imageUrl = `https://drive.google.com/thumbnail?id=${file.getId()}&sz=w1600`;
     }
 
     const rowRecord = {
