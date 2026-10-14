@@ -347,6 +347,19 @@
       </footer>
     </div>
 
+    <dialog id="image-dialog" class="site-dialog image-dialog" aria-label="Imagen ampliada">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="Cerrar imagen ampliada">×</button>
+      <img id="image-dialog-content" alt="" />
+      <p id="image-dialog-caption"></p>
+    </dialog>
+
+    <dialog id="submission-dialog" class="site-dialog submission-dialog" aria-labelledby="submission-dialog-title" aria-describedby="submission-dialog-message">
+      <div class="dialog-mark" aria-hidden="true">✓</div>
+      <h2 id="submission-dialog-title">Enviando tu obra</h2>
+      <p id="submission-dialog-message">Estamos recibiendo la información. Esperá un momento.</p>
+      <button class="primary-button" type="button" data-close-dialog>Cerrar</button>
+    </dialog>
+
     <script src="/script.js"></script>
   </body>
 </html>

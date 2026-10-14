@@ -509,6 +509,15 @@ input[type="file"] {
   object-fit: cover;
 }
 
+.gallery-card img.expandable-image {
+  cursor: zoom-in;
+}
+
+.gallery-card img.expandable-image:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
 .gallery-card-body {
   padding: 16px;
 }
@@ -1127,6 +1136,99 @@ input[type="file"] {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.site-dialog {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 28px);
+  padding: 24px;
+  border: 1px solid rgba(82, 51, 100, 0.18);
+  border-radius: 22px;
+  background: var(--panel);
+  color: var(--brown);
+  box-shadow: 0 28px 80px rgba(30, 18, 38, 0.32);
+}
+
+.site-dialog::backdrop {
+  background: rgba(27, 17, 34, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.image-dialog {
+  width: min(1100px, calc(100vw - 28px));
+  padding: 54px 18px 18px;
+  overflow: auto;
+}
+
+.image-dialog img {
+  width: 100%;
+  max-height: min(76dvh, 900px);
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(45, 31, 51, 0.08);
+}
+
+.image-dialog p {
+  margin: 12px 4px 0;
+  text-align: center;
+  color: var(--brown-soft);
+}
+
+.dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(82, 51, 100, 0.1);
+  color: var(--brown);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.submission-dialog {
+  width: min(460px, calc(100vw - 28px));
+  padding: 36px 30px 28px;
+  text-align: center;
+}
+
+.submission-dialog h2 {
+  margin: 12px 0 8px;
+  font-size: clamp(1.8rem, 7vw, 2.4rem);
+}
+
+.submission-dialog p {
+  margin: 0 0 22px;
+  color: var(--brown-soft);
+}
+
+.dialog-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #e7f1ea;
+  color: #286442;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .site-dialog {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .image-dialog {
+    padding: 54px 10px 14px;
   }
 }
 

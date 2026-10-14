@@ -3,6 +3,12 @@ const statusText = document.getElementById('form-status');
 const galleryFeed = document.getElementById('gallery-feed');
 const votingFeed = document.getElementById('voting-feed');
 const commercialFeed = document.getElementById('commercial-feed');
+const imageDialog = document.getElementById('image-dialog');
+const imageDialogContent = document.getElementById('image-dialog-content');
+const imageDialogCaption = document.getElementById('image-dialog-caption');
+const submissionDialog = document.getElementById('submission-dialog');
+const submissionDialogTitle = document.getElementById('submission-dialog-title');
+const submissionDialogMessage = document.getElementById('submission-dialog-message');
 const fallbackImage = 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=900&q=80';
 let approvedWorks = [];
 
@@ -78,7 +84,7 @@ function workCard(work, voting = false) {
     ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: work.price_currency, maximumFractionDigits: 2 }).format(Number(work.price_amount))
     : '';
   return `<article class="gallery-card">
-    <img src="${escapeHTML(image)}" alt="Obra: ${escapeHTML(work.title)}" loading="lazy" />
+    <img class="expandable-image" src="${escapeHTML(image)}" alt="Obra: ${escapeHTML(work.title)}" aria-label="Ampliar obra: ${escapeHTML(work.title)}" aria-haspopup="dialog" role="button" tabindex="0" data-caption="${escapeHTML(`${work.title} · ${work.author}`)}" loading="lazy" />
     <div class="gallery-card-body">
       <h3>${escapeHTML(work.title)}</h3>
       <p>${escapeHTML(work.author)} · ${escapeHTML(work.theme)}</p>
@@ -131,6 +137,45 @@ function renderAll() {
   renderGallery();
   renderCommercial();
   renderVoting();
+}
+
+function openExpandedImage(image) {
+  if (!imageDialog || !imageDialogContent) return;
+  imageDialogContent.src = image.currentSrc || image.src;
+  imageDialogContent.alt = image.alt;
+  if (imageDialogCaption) imageDialogCaption.textContent = image.dataset.caption || image.alt;
+  if (typeof imageDialog.showModal === 'function') imageDialog.showModal();
+  else window.open(imageDialogContent.src, '_blank', 'noopener');
+}
+
+[galleryFeed, commercialFeed, votingFeed].filter(Boolean).forEach((feed) => {
+  feed.addEventListener('click', (event) => {
+    const image = event.target.closest('.expandable-image');
+    if (image) openExpandedImage(image);
+  });
+  feed.addEventListener('keydown', (event) => {
+    const image = event.target.closest('.expandable-image');
+    if (image && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      openExpandedImage(image);
+    }
+  });
+});
+
+document.querySelectorAll('[data-close-dialog]').forEach((button) => {
+  button.addEventListener('click', () => button.closest('dialog')?.close());
+});
+
+imageDialog?.addEventListener('click', (event) => {
+  if (event.target === imageDialog) imageDialog.close();
+});
+
+function showSubmissionDialog(title, message) {
+  if (!submissionDialog) return;
+  if (submissionDialogTitle) submissionDialogTitle.textContent = title;
+  if (submissionDialogMessage) submissionDialogMessage.textContent = message;
+  if (!submissionDialog.open && typeof submissionDialog.showModal === 'function') submissionDialog.showModal();
+  else if (typeof submissionDialog.showModal !== 'function') window.alert(`${title}\n\n${message}`);
 }
 
 async function loadWorks() {
@@ -237,6 +282,7 @@ if (form) {
     formData.append('description', document.getElementById('descripcion').value.trim());
     selectedCategories.forEach((value) => formData.append('category', value));
     statusText.textContent = 'Enviando obra...';
+    showSubmissionDialog('Enviando tu obra', 'Estamos recibiendo la información. Esperá un momento.');
     if (submitButton) submitButton.disabled = true;
     try {
       const response = await fetch('/api/works', { method: 'POST', body: formData });
@@ -246,11 +292,13 @@ if (form) {
       statusText.textContent = sheetsFailed
         ? 'La obra se guardó en el sitio, pero no se pudo confirmar en Google Sheets. Avisá a la organización antes de volver a enviarla.'
         : 'Obra enviada correctamente. Será revisada por la organización.';
+      showSubmissionDialog(sheetsFailed ? 'Obra recibida' : '¡Obra enviada!', statusText.textContent);
       form.reset();
       updatePriceFields();
       await loadWorks();
     } catch (error) {
       statusText.textContent = error.message || 'Hubo un error al enviar la obra.';
+      showSubmissionDialog('No se pudo enviar', statusText.textContent);
     } finally {
       if (submitButton) submitButton.disabled = false;
     }
