@@ -159,13 +159,13 @@
                 <small>Podés elegir varias opciones (Ctrl o ⌘ + clic).</small>
               </div>
 
-              <div class="field-group">
-                <label for="estado">Estado comercial</label>
-                <select id="estado" name="commercial_status" required>
-                  <option value="No está a la venta">No está a la venta</option>
-                  <option value="A la venta">A la venta</option>
-                </select>
-              </div>
+              <fieldset class="field-group status-options">
+                <legend>Estado comercial</legend>
+                <label class="checkbox-row"><input id="not-for-sale" type="checkbox" value="No está a la venta" checked /> <span>No está a la venta</span></label>
+                <label class="checkbox-row"><input id="for-sale" type="checkbox" value="A la venta" /> <span>A la venta</span></label>
+                <label class="checkbox-row"><input id="salon-participation" type="checkbox" value="Participa en el salón" /> <span>Participa en el salón</span></label>
+                <small>Podés elegir hasta dos opciones: una opción de venta y “Participa en el salón”. Las opciones de venta son excluyentes.</small>
+              </fieldset>
 
               <div class="field-group" id="price-fields" hidden>
                 <label for="price-amount">Precio de la obra</label>

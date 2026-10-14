@@ -20,6 +20,13 @@ function categoriesFor(work) {
   return Array.isArray(work.category) ? work.category : [];
 }
 
+function hasCommercialStatus(work, status) {
+  const statuses = Array.isArray(work.commercial_status)
+    ? work.commercial_status
+    : String(work.commercial_status || '').split(/\s*;\s*/);
+  return statuses.includes(status);
+}
+
 function matchesTheme(work, value) {
   return !value || work.theme === value || categoriesFor(work).includes(value);
 }
@@ -46,7 +53,7 @@ function setOptions(selectId, values) {
 function workCard(work, voting = false) {
   const voted = localStorage.getItem(`salon-vote-${work.id}`) === '1';
   const image = work.image_url || fallbackImage;
-  const price = work.commercial_status === 'A la venta' && Number(work.price_amount) > 0 && ['ARS', 'USD', 'EUR'].includes(work.price_currency)
+  const price = hasCommercialStatus(work, 'A la venta') && Number(work.price_amount) > 0 && ['ARS', 'USD', 'EUR'].includes(work.price_currency)
     ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: work.price_currency, maximumFractionDigits: 2 }).format(Number(work.price_amount))
     : '';
   return `<article class="gallery-card">
@@ -78,7 +85,7 @@ function renderCommercial() {
   const query = (document.getElementById('commercial-search')?.value || '').trim().toLocaleLowerCase('es');
   const theme = document.getElementById('commercial-theme')?.value || '';
   const author = document.getElementById('commercial-author')?.value || '';
-  const items = approvedWorks.filter((work) => work.commercial_status === 'A la venta' && matchesTheme(work, theme) && (!author || work.author === author) && `${work.title} ${work.author}`.toLocaleLowerCase('es').includes(query));
+  const items = approvedWorks.filter((work) => hasCommercialStatus(work, 'A la venta') && matchesTheme(work, theme) && (!author || work.author === author) && `${work.title} ${work.author}`.toLocaleLowerCase('es').includes(query));
   commercialFeed.innerHTML = items.length ? items.map((work) => workCard(work)).join('') : '<div class="empty-state">No hay obras disponibles para la venta.</div>';
 }
 
@@ -149,19 +156,27 @@ async function voteForWork(button) {
 ['gallery-theme', 'gallery-sort', 'commercial-theme', 'commercial-author', 'voting-period', 'voting-theme', 'voting-author', 'voting-sort']
   .forEach((id) => document.getElementById(id)?.addEventListener('change', renderAll));
 
-const commercialStatus = document.getElementById('estado');
+const forSaleCheckbox = document.getElementById('for-sale');
+const notForSaleCheckbox = document.getElementById('not-for-sale');
 const priceFields = document.getElementById('price-fields');
 const priceAmount = document.getElementById('price-amount');
 const priceCurrency = document.getElementById('price-currency');
 function updatePriceFields() {
-  const isForSale = commercialStatus?.value === 'A la venta';
+  const isForSale = Boolean(forSaleCheckbox?.checked);
   if (priceFields) priceFields.hidden = !isForSale;
   if (priceAmount) {
     priceAmount.required = isForSale;
     if (!isForSale) priceAmount.value = '';
   }
 }
-commercialStatus?.addEventListener('change', updatePriceFields);
+forSaleCheckbox?.addEventListener('change', () => {
+  if (forSaleCheckbox.checked && notForSaleCheckbox) notForSaleCheckbox.checked = false;
+  updatePriceFields();
+});
+notForSaleCheckbox?.addEventListener('change', () => {
+  if (notForSaleCheckbox.checked && forSaleCheckbox) forSaleCheckbox.checked = false;
+  updatePriceFields();
+});
 updatePriceFields();
 
 if (form) {
@@ -174,14 +189,23 @@ if (form) {
       statusText.textContent = 'Debes seleccionar una imagen.';
       return;
     }
+    const selectedStatuses = [
+      ...(notForSaleCheckbox.checked ? ['No está a la venta'] : []),
+      ...(forSaleCheckbox.checked ? ['A la venta'] : []),
+      ...(document.getElementById('salon-participation').checked ? ['Participa en el salón'] : [])
+    ];
+    if (forSaleCheckbox.checked === notForSaleCheckbox.checked) {
+      statusText.textContent = 'Elegí una opción: a la venta o no está a la venta.';
+      return;
+    }
     const selectedCategories = Array.from(document.getElementById('categoria').selectedOptions).map((option) => option.value);
     const formData = new FormData();
     formData.append('image', fileInput.files[0]);
     formData.append('title', document.getElementById('titulo').value.trim());
     formData.append('author', document.getElementById('autor').value.trim());
     formData.append('theme', document.getElementById('tema').value);
-    formData.append('commercial_status', document.getElementById('estado').value);
-    if (commercialStatus.value === 'A la venta') {
+    selectedStatuses.forEach((status) => formData.append('commercial_status', status));
+    if (forSaleCheckbox.checked) {
       formData.append('price_amount', priceAmount.value);
       formData.append('price_currency', priceCurrency.value);
     }

@@ -347,6 +347,27 @@ h3 {
   margin-bottom: 16px;
 }
 
+.status-options {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.status-options legend {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.status-options .checkbox-row {
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.status-options .checkbox-row input {
+  flex: 0 0 18px;
+  accent-color: var(--accent);
+}
+
 .price-input-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(190px, 0.85fr);

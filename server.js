@@ -327,7 +327,14 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
       return res.status(503).json({ message: 'El almacenamiento persistente no está configurado en Vercel.' });
     }
 
-    const { title, author, theme, commercial_status, whatsapp, email, description } = req.body;
+    const { title, author, theme, whatsapp, email, description } = req.body;
+    const commercialStatuses = Array.isArray(req.body.commercial_status)
+      ? req.body.commercial_status
+      : (req.body.commercial_status ? [req.body.commercial_status] : []);
+    const allowedCommercialStatuses = ['No está a la venta', 'A la venta', 'Participa en el salón'];
+    const hasSaleStatus = commercialStatuses.includes('A la venta');
+    const hasNotForSaleStatus = commercialStatuses.includes('No está a la venta');
+    const savedCommercialStatus = [...new Set(commercialStatuses)].join('; ');
     const priceAmount = req.body.price_amount === undefined || req.body.price_amount === ''
       ? null
       : Number(req.body.price_amount);
@@ -335,18 +342,19 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
     const selectedCategories = req.body.category ?
       (Array.isArray(req.body.category) ? req.body.category : [req.body.category]) : [];
 
-    if (!title || !author || !theme || !commercial_status || !req.file) {
+    if (!title || !author || !theme || !req.file) {
       return res.status(400).json({ message: 'Faltan campos obligatorios.' });
     }
-    if (!['No está a la venta', 'A la venta'].includes(commercial_status)) {
-      return res.status(400).json({ message: 'Elegí si la obra está a la venta o no.' });
+    if (commercialStatuses.some((status) => !allowedCommercialStatuses.includes(status))
+      || hasSaleStatus === hasNotForSaleStatus) {
+      return res.status(400).json({ message: 'Elegí una opción: a la venta o no está a la venta. También podés indicar si participa en el salón.' });
     }
-    if (commercial_status === 'A la venta'
+    if (hasSaleStatus
       && (!Number.isFinite(priceAmount) || priceAmount <= 0 || !['ARS', 'USD', 'EUR'].includes(priceCurrency))) {
       return res.status(400).json({ message: 'Ingresá un precio mayor a cero y elegí ARS, USD o EUR.' });
     }
-    const savedPriceAmount = commercial_status === 'A la venta' ? priceAmount : null;
-    const savedPriceCurrency = commercial_status === 'A la venta' ? priceCurrency : '';
+    const savedPriceAmount = hasSaleStatus ? priceAmount : null;
+    const savedPriceCurrency = hasSaleStatus ? priceCurrency : '';
 
     const imageRelativePath = `/uploads/${req.file.filename}`;
     const workId = Date.now() * 1000 + crypto.randomInt(0, 1000);
@@ -361,7 +369,7 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
         author,
         theme,
         JSON.stringify(selectedCategories),
-        commercial_status,
+        savedCommercialStatus,
         whatsapp || '',
         email || '',
         description || '',
@@ -378,7 +386,7 @@ app.post('/api/works', upload.single('image'), async (req, res) => {
       author,
       theme,
       category: selectedCategories,
-      commercial_status,
+      commercial_status: savedCommercialStatus,
       price_amount: savedPriceAmount,
       price_currency: savedPriceCurrency,
       whatsapp: whatsapp || '',
