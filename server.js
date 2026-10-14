@@ -193,6 +193,17 @@ app.get('/', (req, res) => {
 app.use('/uploads', express.static(uploadDir));
 app.use(express.static(path.join(__dirname, 'public')));
 
+function normalizeCategories(value) {
+  if (Array.isArray(value)) return value.map((category) => String(category).trim()).filter(Boolean);
+  const raw = String(value || '').trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map((category) => String(category).trim()).filter(Boolean);
+  } catch {}
+  return raw.split(';').map((category) => category.trim()).filter(Boolean);
+}
+
 async function getWorks() {
   if (process.env.VERCEL === '1') {
     if (!GOOGLE_SHEETS_WEBHOOK_URL) {
@@ -210,7 +221,7 @@ async function getWorks() {
     return (result.works || []).map((work) => ({
       ...work,
       id: Number(work.id),
-      category: Array.isArray(work.category) ? work.category : [],
+      category: normalizeCategories(work.category),
       votes: Number(work.votes) || 0,
       image_url: work.image_url || null
     })).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
@@ -222,7 +233,7 @@ async function getWorks() {
 
   return rows.map((row) => ({
     ...row,
-    category: row.category ? JSON.parse(row.category) : [],
+    category: normalizeCategories(row.category),
     image_url: row.image_url || null
   }));
 }

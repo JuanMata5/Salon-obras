@@ -17,7 +17,14 @@ function escapeHTML(value = '') {
 }
 
 function categoriesFor(work) {
-  return Array.isArray(work.category) ? work.category : [];
+  if (Array.isArray(work.category)) return work.category.map((value) => String(value).trim()).filter(Boolean);
+  const raw = String(work.category || '').trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map((value) => String(value).trim()).filter(Boolean);
+  } catch {}
+  return raw.split(';').map((value) => value.trim()).filter(Boolean);
 }
 
 function hasCommercialStatus(work, status) {
@@ -28,7 +35,20 @@ function hasCommercialStatus(work, status) {
 }
 
 function matchesTheme(work, value) {
-  return !value || work.theme === value || categoriesFor(work).includes(value);
+  return !value || String(work.theme || '').trim() === value || categoriesFor(work).includes(value);
+}
+
+function normalizeSearchText(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+}
+
+function searchableWorkText(work) {
+  return normalizeSearchText([work.title, work.author, work.theme, ...categoriesFor(work), work.description]
+    .filter(Boolean).join(' '));
+}
+
+function facetValuesFor(works) {
+  return works.flatMap((work) => [work.theme, ...categoriesFor(work)]);
 }
 
 function sortWorks(works, sortBy) {
@@ -44,7 +64,8 @@ function setOptions(selectId, values) {
   const select = document.getElementById(selectId);
   if (!select) return;
   const selected = select.value;
-  const uniqueValues = [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const options = values.map((value) => String(value || '').trim()).filter(Boolean);
+  const uniqueValues = [...new Set(options)].sort((a, b) => a.localeCompare(b, 'es'));
   select.innerHTML = '<option value="">Todos</option>' + uniqueValues
     .map((value) => `<option value="${escapeHTML(value)}">${escapeHTML(value)}</option>`).join('');
   if (uniqueValues.includes(selected)) select.value = selected;
@@ -71,21 +92,21 @@ function workCard(work, voting = false) {
 
 function renderGallery() {
   if (!galleryFeed) return;
-  const query = (document.getElementById('gallery-search')?.value || '').trim().toLocaleLowerCase('es');
+  const query = normalizeSearchText(document.getElementById('gallery-search')?.value.trim());
   const theme = document.getElementById('gallery-theme')?.value || '';
   const sortBy = document.getElementById('gallery-sort')?.value || 'recent';
   const items = sortWorks(approvedWorks.filter((work) =>
-    matchesTheme(work, theme) && `${work.title} ${work.author} ${work.theme}`.toLocaleLowerCase('es').includes(query)
+    matchesTheme(work, theme) && searchableWorkText(work).includes(query)
   ), sortBy);
   galleryFeed.innerHTML = items.length ? items.map((work) => workCard(work)).join('') : '<div class="empty-state">No hay obras publicadas que coincidan con la búsqueda.</div>';
 }
 
 function renderCommercial() {
   if (!commercialFeed) return;
-  const query = (document.getElementById('commercial-search')?.value || '').trim().toLocaleLowerCase('es');
+  const query = normalizeSearchText(document.getElementById('commercial-search')?.value.trim());
   const theme = document.getElementById('commercial-theme')?.value || '';
   const author = document.getElementById('commercial-author')?.value || '';
-  const items = approvedWorks.filter((work) => hasCommercialStatus(work, 'A la venta') && matchesTheme(work, theme) && (!author || work.author === author) && `${work.title} ${work.author}`.toLocaleLowerCase('es').includes(query));
+  const items = approvedWorks.filter((work) => hasCommercialStatus(work, 'A la venta') && matchesTheme(work, theme) && (!author || String(work.author || '').trim() === author) && searchableWorkText(work).includes(query));
   commercialFeed.innerHTML = items.length ? items.map((work) => workCard(work)).join('') : '<div class="empty-state">No hay obras disponibles para la venta.</div>';
 }
 
@@ -99,7 +120,7 @@ function renderVoting() {
     votingFeed.innerHTML = `<div class="empty-state">${period === 'closed' ? 'La votación está cerrada.' : 'La votación todavía no comenzó.'}</div>`;
     return;
   }
-  const items = sortWorks(approvedWorks.filter((work) => matchesTheme(work, theme) && (!author || work.author === author)), sortBy);
+  const items = sortWorks(approvedWorks.filter((work) => matchesTheme(work, theme) && (!author || String(work.author || '').trim() === author)), sortBy);
   votingFeed.innerHTML = items.length ? items.map((work) => workCard(work, true)).join('') : '<div class="empty-state">Todavía no hay obras aprobadas para votar.</div>';
   votingFeed.querySelectorAll('.vote-btn:not(:disabled)').forEach((button) => {
     button.addEventListener('click', () => voteForWork(button));
@@ -118,10 +139,12 @@ async function loadWorks() {
     if (!response.ok) throw new Error('No se pudieron cargar las obras.');
     const data = await response.json();
     approvedWorks = (data.works || []).filter((work) => work.status === 'approved');
-    const themes = approvedWorks.flatMap((work) => [work.theme, ...categoriesFor(work)]);
-    const authors = approvedWorks.map((work) => work.author);
-    ['gallery-theme', 'commercial-theme', 'voting-theme'].forEach((id) => setOptions(id, themes));
-    ['commercial-author', 'voting-author'].forEach((id) => setOptions(id, authors));
+    const commercialWorks = approvedWorks.filter((work) => hasCommercialStatus(work, 'A la venta'));
+    setOptions('gallery-theme', facetValuesFor(approvedWorks));
+    setOptions('commercial-theme', facetValuesFor(commercialWorks));
+    setOptions('voting-theme', facetValuesFor(approvedWorks));
+    setOptions('commercial-author', commercialWorks.map((work) => work.author));
+    setOptions('voting-author', approvedWorks.map((work) => work.author));
     renderAll();
   } catch (error) {
     [galleryFeed, commercialFeed, votingFeed].filter(Boolean).forEach((feed) => {
