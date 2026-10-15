@@ -210,6 +210,51 @@
           </div>
         </section>
 
+        <section class="voting section-space" id="votacion" aria-labelledby="voting-heading">
+          <div class="container voting-shell">
+            <div class="voting-header">
+              <p class="label">Salón 2026</p>
+              <h2 id="voting-heading">Votación de Obras para el Salón</h2>
+              <p>
+                Explorá las obras participantes elegibles y acompañá con tu voto aquellas que te
+                gustaría ver destacadas en el salón.
+              </p>
+            </div>
+
+            <div class="toolbar vote-toolbar">
+              <div class="field-group inline-field">
+                <label>Período de votación</label>
+                  <select id="voting-period">
+                    <option value="open">Votación abierta</option>
+                    <option value="closed">Votación cerrada</option>
+                    <option value="soon">Próximamente</option>
+                </select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Filtrar por tema o categoría</label>
+                <select id="voting-theme"><option value="">Todos</option></select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Filtrar por autor</label>
+                <select id="voting-author"><option value="">Todos</option></select>
+              </div>
+              <div class="field-group inline-field">
+                <label>Ordenar obras</label>
+                <select id="voting-sort">
+                  <option value="votes">Más votadas</option>
+                  <option value="recent">Más recientes</option>
+                  <option value="theme">Por tema</option>
+                </select>
+              </div>
+            </div>
+
+            <p class="muted-note">
+              La organización podrá validar y moderar las obras antes de publicar los resultados.
+            </p>
+            <div id="voting-feed" class="gallery-feed"></div>
+          </div>
+        </section>
+
         <section class="gallery-section section-space" id="galeria" aria-labelledby="galeria-heading">
           <div class="container">
             <p class="label">Galería pública</p>
@@ -271,50 +316,7 @@
           </div>
         </section>
 
-        <section class="voting section-space" id="votacion" aria-labelledby="voting-heading">
-          <div class="container voting-shell">
-            <div class="voting-header">
-              <p class="label">Salón 2026</p>
-              <h2 id="voting-heading">Votación de Obras para el Salón</h2>
-              <p>
-                Explorá las obras participantes elegibles y acompañá con tu voto aquellas que te
-                gustaría ver destacadas en el salón.
-              </p>
-            </div>
 
-            <div class="toolbar vote-toolbar">
-              <div class="field-group inline-field">
-                <label>Período de votación</label>
-                  <select id="voting-period">
-                    <option value="open">Votación abierta</option>
-                    <option value="closed">Votación cerrada</option>
-                    <option value="soon">Próximamente</option>
-                </select>
-              </div>
-              <div class="field-group inline-field">
-                <label>Filtrar por tema o categoría</label>
-                <select id="voting-theme"><option value="">Todos</option></select>
-              </div>
-              <div class="field-group inline-field">
-                <label>Filtrar por autor</label>
-                <select id="voting-author"><option value="">Todos</option></select>
-              </div>
-              <div class="field-group inline-field">
-                <label>Ordenar obras</label>
-                <select id="voting-sort">
-                  <option value="votes">Más votadas</option>
-                  <option value="recent">Más recientes</option>
-                  <option value="theme">Por tema</option>
-                </select>
-              </div>
-            </div>
-
-            <p class="muted-note">
-              La organización podrá validar y moderar las obras antes de publicar los resultados.
-            </p>
-            <div id="voting-feed" class="gallery-feed"></div>
-          </div>
-        </section>
 
         <section class="internal section-space">
           <div class="container internal-box">
