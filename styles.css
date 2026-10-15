@@ -827,7 +827,22 @@ h3 {
 }
 
 .page-shell {
-  background: var(--panel);
+  background-color: var(--panel);
+  background-image:
+    radial-gradient(ellipse at 12% 18%, rgba(91, 52, 120, 0.085), transparent 32%),
+    radial-gradient(ellipse at 86% 42%, rgba(145, 79, 53, 0.065), transparent 30%),
+    radial-gradient(ellipse at 34% 88%, rgba(91, 52, 120, 0.06), transparent 34%);
+  background-size: 140% 140%;
+  animation: salon-background-drift 32s ease-in-out infinite alternate;
+}
+
+@keyframes salon-background-drift {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell { animation: none; }
 }
 
 .support-bar {
