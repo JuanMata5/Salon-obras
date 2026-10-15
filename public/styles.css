@@ -2037,21 +2037,26 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Fondo editorial con movimiento sutil para la página publicada. */
-.page-shell {
-  background-color: var(--panel);
+body {
+  background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse at 12% 18%, rgba(91, 52, 120, 0.085), transparent 32%),
-    radial-gradient(ellipse at 86% 42%, rgba(145, 79, 53, 0.065), transparent 30%),
-    radial-gradient(ellipse at 34% 88%, rgba(91, 52, 120, 0.06), transparent 34%);
-  background-size: 140% 140%;
-  animation: salon-background-drift 32s ease-in-out infinite alternate;
+    radial-gradient(ellipse at 12% 18%, rgba(91, 52, 120, 0.2), transparent 35%),
+    radial-gradient(ellipse at 86% 32%, rgba(145, 79, 53, 0.16), transparent 34%),
+    radial-gradient(ellipse at 36% 88%, rgba(91, 52, 120, 0.13), transparent 38%),
+    linear-gradient(125deg, #f1ebdf, #e8dced 48%, #f1ebdf);
+  background-size: 180% 180%;
+  background-attachment: fixed;
+  animation: salon-background-drift 28s ease-in-out infinite alternate;
 }
 
+.page-shell {
+  background: transparent;
+}
 @keyframes salon-background-drift {
   from { background-position: 0% 0%; }
   to { background-position: 100% 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-shell { animation: none; }
+  body { animation: none; }
 }
