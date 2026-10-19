@@ -134,6 +134,24 @@ button {
   box-shadow: 0 14px 26px rgba(76, 45, 101, 0.24);
 }
 
+.nav-pdf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(86, 48, 111, 0.24);
+  border-radius: 999px;
+  background: #fffdf9;
+  color: #56306f;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.nav-pdf::before { content: "↓"; margin-right: 7px; font-size: 1.1rem; }
+.nav-pdf:hover { transform: translateY(-2px); background: #f4edf7; }
+
 .admin-link-top {
   display: inline-flex;
   align-items: center;
@@ -1381,6 +1399,10 @@ input[type="file"] {
 }
 
 @media (max-width: 900px) {
+  .nav-wrap { flex-wrap: wrap; padding-block: 10px; }
+  .nav-wrap > .brand { flex: 1 1 100%; }
+  .header-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+
   .admin-header {
     align-items: flex-start;
   }
@@ -1414,7 +1436,8 @@ input[type="file"] {
 
   .header-actions .admin-link-top,
   .header-actions .primary-button,
-  .header-actions .nav-ticket {
+  .header-actions .nav-ticket,
+  .header-actions .nav-pdf {
     width: 100%;
     min-width: 0;
     padding-inline: 8px;
