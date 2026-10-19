@@ -2110,6 +2110,32 @@ body {
   font-weight: 800;
 }
 
+.back-to-top-fab {
+  position: fixed;
+  right: clamp(16px, 3vw, 32px);
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #684182, #56306f);
+  box-shadow: 0 12px 28px rgba(45, 27, 58, 0.3);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.back-to-top-fab:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(45, 27, 58, 0.38);
+}
+
 .registration-card {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
