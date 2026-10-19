@@ -2167,7 +2167,7 @@ body {
 
 .registration-button-study small { color: var(--muted); }
 
-.important-info { padding-bottom: 20px; }
+.important-info { padding-bottom: 20px; scroll-margin-top: 96px; }
 
 .important-intro {
   max-width: 72ch;
